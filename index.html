@@ -1,0 +1,1082 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#04060d" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#04060d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="R&C Manager">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<title>Restaurant & Cafe Manager</title>
+
+<!-- Inline apple-touch-icon (simple mint square) -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%2304060d'/%3E%3Crect x='40' y='40' width='100' height='100' rx='22' fill='%2335e0a1'/%3E%3Cpath d='M70 95h40M90 75v40' stroke='%2303140d' stroke-width='10' stroke-linecap='round'/%3E%3C/svg%3E">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2304060d'/%3E%3Crect x='6' y='6' width='20' height='20' rx='5' fill='%2335e0a1'/%3E%3C/svg%3E">
+
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #04060d;
+  --panel: #0b1120;
+  --panel-2: #111a2e;
+  --line: #1b2742;
+  --fg: #eef2fb;
+  --muted: #8a96b2;
+  --accent: #35e0a1;
+  --accent-ink: #03140d;
+  --accent-soft: rgba(53,224,161,.13);
+  --month: #35e0a1;
+  --year: #6f9cff;
+  --once: #ffb454;
+  --month-soft: rgba(53,224,161,.13);
+  --year-soft: rgba(111,156,255,.14);
+  --once-soft: rgba(255,180,84,.14);
+  --danger: #ff7b72;
+  --danger-soft: rgba(255,123,114,.14);
+  --font-display: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html {
+  height: 100%;
+  scroll-padding-top: var(--safe-top);
+}
+
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  padding-left: max(16px, var(--safe-left));
+  padding-right: max(16px, var(--safe-right));
+  padding-bottom: calc(48px + var(--safe-bottom));
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: contain;
+}
+
+/* Status bar background when in standalone */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: var(--safe-top);
+  z-index: 30;
+  background: var(--bg);
+  pointer-events: none;
+}
+
+button, input {
+  font: inherit;
+  color: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+button { cursor: pointer; border: 0; background: none; }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.wrap { max-width: 1040px; margin: 0 auto; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* Top bar */
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--bg);
+  padding-top: calc(12px + var(--safe-top));
+  padding-bottom: 12px;
+}
+.top .wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: .1em;
+  font-size: 13px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.brand i {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--accent);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 999px;
+  padding: 12px 20px;
+  font-weight: 700;
+  font-size: 14px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  white-space: nowrap;
+  min-height: 44px;
+  transition: filter .15s, transform .1s;
+}
+.btn:active { transform: scale(0.97); }
+.btn.ghost {
+  background: transparent;
+  color: var(--fg);
+  box-shadow: inset 0 0 0 1.5px var(--line);
+}
+.btn.small {
+  padding: 10px 16px;
+  font-size: 13px;
+  min-height: 40px;
+}
+.btn.danger {
+  background: var(--danger);
+  color: #1a0503;
+}
+
+.note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--accent-soft);
+  border: 1px solid rgba(53,224,161,.25);
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+.note p { margin: 0; min-width: 0; }
+
+/* Summary cards */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 16px;
+  min-width: 0;
+}
+.card .label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.card .value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(20px, 3.2vw, 28px);
+  letter-spacing: -.02em;
+  line-height: 1.15;
+  margin: 8px 0 2px;
+  overflow-wrap: anywhere;
+}
+.card .value small {
+  font-size: .5em;
+  color: var(--muted);
+  margin-left: 4px;
+  letter-spacing: 0;
+}
+.card .sub { font-size: 12.5px; color: var(--muted); }
+.card.total {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.card.total .label,
+.card.total .sub,
+.card.total .value small { color: rgba(3,20,13,.7); }
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.dot.month { background: var(--month); }
+.dot.year { background: var(--year); }
+.dot.once { background: var(--once); }
+
+/* Client list */
+.panel {
+  margin-top: 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 16px;
+}
+.tools {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.search {
+  flex: 1 1 200px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0 14px;
+  min-height: 44px;
+}
+.search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  padding: 11px 0;
+  outline: none;
+  font-size: 16px; /* prevents iOS zoom */
+}
+.search input::placeholder { color: var(--muted); }
+.search:focus-within { border-color: var(--accent); }
+.search svg { flex: none; color: var(--muted); }
+
+.chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.chip {
+  border: 1px solid var(--line);
+  background: transparent;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-weight: 600;
+  font-size: 13px;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  min-height: 40px;
+  transition: background .15s, color .15s;
+}
+.chip:active { transform: scale(0.97); }
+.chip i { font-style: normal; color: var(--muted); }
+.chip[aria-pressed="true"] {
+  background: var(--fg);
+  color: var(--bg);
+  border-color: var(--fg);
+}
+.chip[aria-pressed="true"] i { color: inherit; opacity: .65; }
+
+.head, .row {
+  display: grid;
+  grid-template-columns: 2fr 1.7fr 1fr .9fr 1fr 120px;
+  gap: 12px;
+  align-items: center;
+}
+.head {
+  padding: 10px 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--line);
+}
+.row {
+  padding: 14px 6px;
+  border-bottom: 1px solid var(--line);
+}
+.row:last-child { border-bottom: 0; }
+.row > * { min-width: 0; }
+
+.who {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.av {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+}
+.who strong, .who span.sub {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.who span.sub {
+  color: var(--muted);
+  font-size: 13px;
+}
+.contact span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+.contact span + span { color: var(--muted); }
+
+.pill {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.pill.month { background: var(--month-soft); color: var(--month); }
+.pill.year { background: var(--year-soft); color: var(--year); }
+.pill.once { background: var(--once-soft); color: var(--once); }
+
+.price { font-weight: 700; }
+
+.act {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+}
+.icon-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+  transition: background .15s, color .15s;
+}
+.icon-btn:active { background: var(--panel-2); color: var(--fg); }
+.icon-btn.del:active { background: var(--danger-soft); color: var(--danger); }
+
+.confirm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.empty {
+  text-align: center;
+  padding: 48px 16px;
+  color: var(--muted);
+}
+.empty h3 {
+  font-family: var(--font-display);
+  color: var(--fg);
+  font-size: 18px;
+  margin: 0 0 6px;
+}
+.empty p { margin: 0 0 18px; }
+
+/* Modal */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(2,4,9,.75);
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+  -webkit-overflow-scrolling: touch;
+}
+.modal[hidden] { display: none !important; }
+
+.sheet {
+  width: 100%;
+  max-width: 540px;
+  max-height: min(92vh, 100%);
+  overflow: auto;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 24px 24px 0 0;
+  padding: 20px 20px calc(20px + var(--safe-bottom));
+  overscroll-behavior: contain;
+}
+@media (min-width: 560px) {
+  .modal { align-items: center; padding: 16px; }
+  .sheet {
+    border-radius: 24px;
+    padding: 24px;
+    max-height: 90vh;
+  }
+}
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.sheet-head h2 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  margin: 0;
+  letter-spacing: -.02em;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.field { min-width: 0; }
+.field.full { grid-column: 1 / -1; }
+.field label, .field .lab {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.field input[type=text],
+.field input[type=email],
+.field input[type=tel],
+.field input[type=number] {
+  width: 100%;
+  border: 1.5px solid var(--line);
+  background: var(--bg);
+  border-radius: 12px;
+  padding: 12px 14px;
+  outline: none;
+  font-size: 16px; /* prevents iOS zoom */
+  min-height: 48px;
+}
+.field input:focus { border-color: var(--accent); }
+.field input[aria-invalid="true"] { border-color: var(--danger); }
+
+.err {
+  color: var(--danger);
+  font-size: 12.5px;
+  margin: 5px 0 0;
+}
+.err:empty { display: none; }
+
+.price-in { position: relative; }
+.price-in em {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-style: normal;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  pointer-events: none;
+}
+.price-in input { padding-right: 56px !important; }
+
+.seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  padding: 4px;
+  border-radius: 14px;
+}
+.seg input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.seg label {
+  margin: 0;
+  text-align: center;
+  padding: 12px 6px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--muted);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s, color .15s;
+}
+.seg input:checked + label {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.seg input:focus-visible + label {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + var(--safe-bottom));
+  transform: translateX(-50%);
+  z-index: 50;
+  background: var(--fg);
+  color: var(--bg);
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 14px;
+  max-width: calc(100vw - 32px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.35);
+  animation: toast-in .25s ease;
+}
+.toast[hidden] { display: none !important; }
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 860px) {
+  .cards { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 760px) {
+  .head { display: none; }
+  .row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "who act"
+      "city city"
+      "contact contact"
+      "pill price";
+    gap: 8px 12px;
+    padding: 16px 4px;
+  }
+  .row .who { grid-area: who; }
+  .row .act { grid-area: act; }
+  .row .city { grid-area: city; color: var(--muted); font-size: 14px; }
+  .row .contact { grid-area: contact; }
+  .row .planc { grid-area: pill; }
+  .row .price { grid-area: price; text-align: right; }
+}
+@media (max-width: 560px) {
+  .brand { letter-spacing: .06em; font-size: 12px; }
+  .form-grid { grid-template-columns: 1fr; }
+  .cards { gap: 10px; }
+  .card { padding: 14px; border-radius: 16px; }
+}
+
+/* Standalone mode tweaks */
+@media (display-mode: standalone) {
+  .top { padding-top: calc(8px + var(--safe-top)); }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><i></i>Restaurant &amp; Cafe Manager</div>
+    <button class="btn" id="open-add" type="button">+ Add client</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="note" id="note" hidden>
+    <p>These are example clients so you can try the app. Your changes stay on this device.</p>
+    <button class="btn ghost small" id="clear-examples" type="button">Remove examples</button>
+  </div>
+
+  <section class="cards" aria-label="Summary">
+    <div class="card total">
+      <div class="label">Total revenue</div>
+      <div class="value num" id="revenue">0<small>MAD</small></div>
+      <div class="sub num" id="s-clients">0 clients</div>
+    </div>
+    <div class="card" id="card-month"></div>
+    <div class="card" id="card-year"></div>
+    <div class="card" id="card-once"></div>
+  </section>
+
+  <section class="panel" aria-label="Clients">
+    <div class="tools">
+      <label class="search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input id="search" type="search" placeholder="Search restaurant, name or city" autocomplete="off" enterkeyhint="search" aria-label="Search clients">
+      </label>
+      <div class="chips" id="chips" role="group" aria-label="Filter by subscription type"></div>
+    </div>
+    <div class="head" aria-hidden="true">
+      <div>Client</div><div>Contact</div><div>City</div><div>Plan</div><div>Price</div><div></div>
+    </div>
+    <div id="rows"></div>
+  </section>
+</main>
+
+<div class="modal" id="modal" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="sheet-head">
+      <h2 id="modal-title">Add a new client</h2>
+      <button class="icon-btn" id="close-modal" type="button" aria-label="Close">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <form id="client-form" novalidate>
+      <div class="form-grid">
+        <div class="field">
+          <label for="f-firstName">First name</label>
+          <input id="f-firstName" name="firstName" type="text" autocomplete="given-name" enterkeyhint="next">
+          <p class="err" id="e-firstName"></p>
+        </div>
+        <div class="field">
+          <label for="f-lastName">Last name</label>
+          <input id="f-lastName" name="lastName" type="text" autocomplete="family-name" enterkeyhint="next">
+          <p class="err" id="e-lastName"></p>
+        </div>
+        <div class="field full">
+          <label for="f-restaurant">Restaurant / cafe name</label>
+          <input id="f-restaurant" name="restaurant" type="text" autocomplete="organization" enterkeyhint="next">
+          <p class="err" id="e-restaurant"></p>
+        </div>
+        <div class="field">
+          <label for="f-email">Email</label>
+          <input id="f-email" name="email" type="email" inputmode="email" autocomplete="email" enterkeyhint="next">
+          <p class="err" id="e-email"></p>
+        </div>
+        <div class="field">
+          <label for="f-phone">Phone number</label>
+          <input id="f-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" enterkeyhint="next">
+          <p class="err" id="e-phone"></p>
+        </div>
+        <div class="field">
+          <label for="f-city">City</label>
+          <input id="f-city" name="city" type="text" autocomplete="address-level2" enterkeyhint="next">
+          <p class="err" id="e-city"></p>
+        </div>
+        <div class="field">
+          <label for="f-price">Price</label>
+          <div class="price-in">
+            <input id="f-price" name="price" type="number" min="0" step="any" inputmode="decimal" enterkeyhint="done">
+            <em>MAD</em>
+          </div>
+          <p class="err" id="e-price"></p>
+        </div>
+        <div class="field full">
+          <span class="lab" id="sub-lab">Subscription type</span>
+          <div class="seg" role="radiogroup" aria-labelledby="sub-lab">
+            <input type="radio" name="sub" id="sub-month" value="month" checked>
+            <label for="sub-month">Monthly</label>
+            <input type="radio" name="sub" id="sub-year" value="year">
+            <label for="sub-year">Yearly</label>
+            <input type="radio" name="sub" id="sub-once" value="one time">
+            <label for="sub-once">One time</label>
+          </div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn ghost" type="button" id="cancel-add">Cancel</button>
+        <button class="btn" type="submit" id="save-btn">Save client</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+(function () {
+  'use strict';
+  var KEY = 'rcm-clients-v1';
+  var SUBS = [
+    { key: 'month',    label: 'Monthly',  cls: 'month', card: 'card-month' },
+    { key: 'year',     label: 'Yearly',   cls: 'year',  card: 'card-year' },
+    { key: 'one time', label: 'One time', cls: 'once',  card: 'card-once' }
+  ];
+  var $ = function (id) { return document.getElementById(id); };
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function money(n) {
+    return Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 });
+  }
+  function subInfo(key) {
+    return SUBS.filter(function (s) { return s.key === key; })[0] || SUBS[2];
+  }
+  function uid() {
+    return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  }
+
+  function seed() {
+    var d = [
+      ['Salma', 'Idrissi', 'Café Atlas', 'salma@cafeatlas.example', '0612 34 56 78', 'Rabat', 1200, 'month'],
+      ['Youssef', 'Bennani', 'Riad Saveurs', 'youssef@riadsaveurs.example', '0661 22 90 41', 'Marrakech', 9800, 'year'],
+      ['Nadia', 'El Fassi', 'Le Petit Zellige', 'nadia@petitzellige.example', '0623 77 18 05', 'Casablanca', 2400, 'month'],
+      ['Omar', 'Tazi', 'Grill du Port', 'omar@grillduport.example', '0650 09 33 62', 'Tangier', 4500, 'one time'],
+      ['Hind', 'Alaoui', 'Bakery Corner', 'hind@bakerycorner.example', '0634 51 27 90', 'Fes', 8200, 'year']
+    ];
+    return d.map(function (r, i) {
+      return {
+        id: 'ex' + i, example: true,
+        firstName: r[0], lastName: r[1], restaurant: r[2],
+        email: r[3], phone: r[4], city: r[5], price: r[6], sub: r[7]
+      };
+    });
+  }
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) {
+        var a = JSON.parse(raw);
+        if (Array.isArray(a)) return a;
+      }
+    } catch (e) {}
+    return seed();
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(clients)); } catch (e) {}
+  }
+
+  var clients = load();
+  var filter = 'all';
+  var query = '';
+  var confirmId = null;
+  var editId = null;
+  var toastTimer = null;
+  var lastFocus = null;
+
+  /* ---------- summary ---------- */
+  function renderSummary() {
+    var total = 0, n = clients.length, by = {};
+    SUBS.forEach(function (s) { by[s.key] = { count: 0, rev: 0 }; });
+    clients.forEach(function (c) {
+      var p = Number(c.price) || 0;
+      total += p;
+      var b = by[c.sub] || by['one time'];
+      b.count++;
+      b.rev += p;
+    });
+    $('revenue').innerHTML = money(total) + '<small>MAD</small>';
+    $('s-clients').textContent = n + (n === 1 ? ' client' : ' clients');
+    SUBS.forEach(function (s) {
+      var b = by[s.key];
+      $(s.card).innerHTML =
+        '<div class="label"><i class="dot ' + s.cls + '"></i>' + s.label + '</div>' +
+        '<div class="value num">' + b.count + '</div>' +
+        '<div class="sub num">' + money(b.rev) + ' MAD</div>';
+    });
+    $('note').hidden = !clients.some(function (c) { return c.example; });
+  }
+
+  /* ---------- chips ---------- */
+  function renderChips() {
+    var items = [{ key: 'all', label: 'All', count: clients.length }].concat(
+      SUBS.map(function (s) {
+        return {
+          key: s.key,
+          label: s.label,
+          count: clients.filter(function (c) { return c.sub === s.key; }).length
+        };
+      })
+    );
+    $('chips').innerHTML = items.map(function (it) {
+      return '<button type="button" class="chip" data-filter="' + esc(it.key) + '" aria-pressed="' + (filter === it.key) + '">' +
+        it.label + ' <i class="num">' + it.count + '</i></button>';
+    }).join('');
+  }
+
+  /* ---------- list ---------- */
+  function matches(c) {
+    if (filter !== 'all' && c.sub !== filter) return false;
+    if (!query) return true;
+    var hay = [c.restaurant, c.firstName + ' ' + c.lastName, c.city, c.email].join(' ').toLowerCase();
+    return hay.indexOf(query.toLowerCase()) !== -1;
+  }
+
+  function renderRows() {
+    var list = clients.filter(matches);
+    var el = $('rows');
+    if (!clients.length) {
+      el.innerHTML = '<div class="empty"><h3>No clients yet</h3><p>Add your first restaurant or cafe to start tracking revenue.</p><button class="btn" type="button" data-open-add>Add a client</button></div>';
+      return;
+    }
+    if (!list.length) {
+      var what = query ? 'No restaurant or cafe matches “' + esc(query) + '”' : 'No clients on this plan yet';
+      el.innerHTML = '<div class="empty"><h3>' + what + '</h3><p>Try another search or switch the plan filter.</p></div>';
+      return;
+    }
+    el.innerHTML = list.map(function (c) {
+      var s = subInfo(c.sub);
+      var actions;
+      if (confirmId === c.id) {
+        actions = '<div class="confirm">' +
+          '<button class="btn ghost small" type="button" data-cancel>Cancel</button>' +
+          '<button class="btn danger small" type="button" data-confirm="' + esc(c.id) + '">Delete</button>' +
+          '</div>';
+      } else {
+        actions =
+          '<button class="icon-btn" type="button" data-edit="' + esc(c.id) + '" aria-label="Edit ' + esc(c.restaurant) + '">' +
+            '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>' +
+          '</button>' +
+          '<button class="icon-btn del" type="button" data-del="' + esc(c.id) + '" aria-label="Delete ' + esc(c.restaurant) + '">' +
+            '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>' +
+          '</button>';
+      }
+      return '<article class="row">' +
+        '<div class="who"><span class="av" aria-hidden="true">' + esc((c.restaurant || '?').charAt(0).toUpperCase()) + '</span>' +
+          '<div style="min-width:0"><strong>' + esc(c.restaurant) + '</strong><span class="sub">' + esc(c.firstName + ' ' + c.lastName) + '</span></div></div>' +
+        '<div class="contact"><span>' + esc(c.email || 'No email') + '</span><span class="num">' + esc(c.phone || 'No phone') + '</span></div>' +
+        '<div class="city">' + esc(c.city || '') + '</div>' +
+        '<div class="planc"><span class="pill ' + s.cls + '">' + s.label + '</span></div>' +
+        '<div class="price num">' + money(c.price) + ' MAD</div>' +
+        '<div class="act">' + actions + '</div>' +
+      '</article>';
+    }).join('');
+  }
+
+  function renderAll() {
+    renderSummary();
+    renderChips();
+    renderRows();
+  }
+
+  /* ---------- events ---------- */
+  $('chips').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-filter]');
+    if (!b) return;
+    filter = b.getAttribute('data-filter');
+    confirmId = null;
+    renderChips();
+    renderRows();
+  });
+
+  $('search').addEventListener('input', function (e) {
+    query = e.target.value.trim();
+    confirmId = null;
+    renderRows();
+  });
+
+  $('rows').addEventListener('click', function (e) {
+    var del = e.target.closest('[data-del]');
+    if (del) {
+      confirmId = del.getAttribute('data-del');
+      renderRows();
+      return;
+    }
+    if (e.target.closest('[data-cancel]')) {
+      confirmId = null;
+      renderRows();
+      return;
+    }
+    var ok = e.target.closest('[data-confirm]');
+    if (ok) {
+      var id = ok.getAttribute('data-confirm');
+      var gone = clients.filter(function (c) { return c.id === id; })[0];
+      clients = clients.filter(function (c) { return c.id !== id; });
+      confirmId = null;
+      save();
+      renderAll();
+      toast((gone ? gone.restaurant : 'Client') + ' deleted');
+      return;
+    }
+    var ed = e.target.closest('[data-edit]');
+    if (ed) {
+      openModal(ed.getAttribute('data-edit'));
+    }
+  });
+
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('[data-open-add]')) openModal();
+  });
+
+  $('clear-examples').addEventListener('click', function () {
+    clients = clients.filter(function (c) { return !c.example; });
+    save();
+    renderAll();
+    toast('Examples removed');
+  });
+
+  /* ---------- modal & form ---------- */
+  var FIELDS = ['firstName', 'lastName', 'restaurant', 'email', 'phone', 'city', 'price'];
+
+  function openModal(id) {
+    lastFocus = document.activeElement;
+    editId = id || null;
+    $('client-form').reset();
+    FIELDS.forEach(function (f) { clearErr(f); });
+    $('sub-month').checked = true;
+
+    if (editId) {
+      var c = clients.filter(function (x) { return x.id === editId; })[0];
+      if (c) {
+        $('f-firstName').value = c.firstName || '';
+        $('f-lastName').value = c.lastName || '';
+        $('f-restaurant').value = c.restaurant || '';
+        $('f-email').value = c.email || '';
+        $('f-phone').value = c.phone || '';
+        $('f-city').value = c.city || '';
+        $('f-price').value = c.price != null ? c.price : '';
+        var radio = document.querySelector('input[name="sub"][value="' + (c.sub || 'month') + '"]');
+        if (radio) radio.checked = true;
+        $('modal-title').textContent = 'Edit client';
+        $('save-btn').textContent = 'Save changes';
+      }
+    } else {
+      $('modal-title').textContent = 'Add a new client';
+      $('save-btn').textContent = 'Save client';
+    }
+
+    $('modal').hidden = false;
+    document.body.style.overflow = 'hidden';
+    setTimeout(function () { $('f-firstName').focus(); }, 40);
+  }
+
+  function closeModal() {
+    $('modal').hidden = true;
+    document.body.style.overflow = '';
+    editId = null;
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+
+  function setErr(f, msg) {
+    $('e-' + f).textContent = msg;
+    $('f-' + f).setAttribute('aria-invalid', 'true');
+  }
+  function clearErr(f) {
+    $('e-' + f).textContent = '';
+    $('f-' + f).removeAttribute('aria-invalid');
+  }
+
+  $('open-add').addEventListener('click', function () { openModal(); });
+  $('close-modal').addEventListener('click', closeModal);
+  $('cancel-add').addEventListener('click', closeModal);
+  $('modal').addEventListener('mousedown', function (e) {
+    if (e.target === $('modal')) closeModal();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !$('modal').hidden) closeModal();
+  });
+  FIELDS.forEach(function (f) {
+    $('f-' + f).addEventListener('input', function () { clearErr(f); });
+  });
+
+  $('client-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var v = {};
+    FIELDS.forEach(function (f) {
+      v[f] = $('f-' + f).value.trim();
+      clearErr(f);
+    });
+    var sub = document.querySelector('input[name="sub"]:checked').value;
+    var bad = null;
+    function fail(f, m) {
+      setErr(f, m);
+      if (!bad) bad = f;
+    }
+    if (!v.firstName) fail('firstName', 'Enter a first name.');
+    if (!v.lastName) fail('lastName', 'Enter a last name.');
+    if (!v.restaurant) fail('restaurant', 'Enter the restaurant or cafe name.');
+    if (v.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)) fail('email', 'Enter a valid email.');
+    if (v.phone && !/^[+()\d\s.-]{6,}$/.test(v.phone)) fail('phone', 'Use digits, e.g. 0612 34 56 78.');
+    if (!v.city) fail('city', 'Enter the city.');
+    var price = Number(v.price);
+    if (v.price === '' || isNaN(price) || price < 0) fail('price', 'Enter a price of 0 or more.');
+    if (bad) {
+      $('f-' + bad).focus();
+      return;
+    }
+
+    if (editId) {
+      var idx = -1;
+      for (var i = 0; i < clients.length; i++) {
+        if (clients[i].id === editId) { idx = i; break; }
+      }
+      if (idx >= 0) {
+        clients[idx] = {
+          id: clients[idx].id,
+          example: clients[idx].example,
+          firstName: v.firstName,
+          lastName: v.lastName,
+          restaurant: v.restaurant,
+          email: v.email,
+          phone: v.phone,
+          city: v.city,
+          price: price,
+          sub: sub
+        };
+        toast(v.restaurant + ' updated');
+      }
+    } else {
+      clients.unshift({
+        id: uid(),
+        firstName: v.firstName,
+        lastName: v.lastName,
+        restaurant: v.restaurant,
+        email: v.email,
+        phone: v.phone,
+        city: v.city,
+        price: price,
+        sub: sub
+      });
+      toast(v.restaurant + ' added');
+    }
+
+    filter = 'all';
+    query = '';
+    $('search').value = '';
+    confirmId = null;
+    save();
+    closeModal();
+    renderAll();
+  });
+
+  function toast(msg) {
+    var t = $('toast');
+    t.textContent = msg;
+    t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.hidden = true; }, 2600);
+  }
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
